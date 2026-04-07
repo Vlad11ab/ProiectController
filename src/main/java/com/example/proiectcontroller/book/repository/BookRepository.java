@@ -13,11 +13,10 @@ import java.util.Optional;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    @Query("select (count(b)>0) from Book b where lower(b.name) = :name")
+    @Query("select (count(b)>0) from Book b where lower(b.name) =lower(:name)")
     boolean existsByNameIgnoreCase(@Param("name") String name);
 
-    @Query("select from Book b where lower(b.name) = :name")
-    Optional<Book> findByName(@Param("name") String bookName);
+    Optional<Book> findByNameIgnoreCase(String name);
 
     @Override
     List<Book> findAll();

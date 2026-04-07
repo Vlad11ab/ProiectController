@@ -44,7 +44,7 @@ public class BookQueryServiceImpl implements BookQueryService {
 
     @Override
     public Optional<BookResponse> findByName(String bookName) {
-        Book book = bookRepository.findByName(bookName)
+        Book book = bookRepository.findByNameIgnoreCase(bookName)
                 .orElseThrow(()->new BookNotFoundException());
 
         return Optional.ofNullable(bookMapper.toDto(book));

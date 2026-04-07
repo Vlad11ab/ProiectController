@@ -32,7 +32,7 @@ public class BookCommandServiceImpl implements BookCommandService {
     @Override
     @Transactional
     public BookResponse createBook(BookCreateRequest req) {
-        if(bookRepository.findByName(req.name())){
+        if(bookRepository.findByNameIgnoreCase(req.name()).isPresent()){
             throw new BookAlreadyExistsException();
         }
 
