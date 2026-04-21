@@ -27,4 +27,5 @@ public class Book {
     @NotBlank
     private String category;
 
+    //todo: securitate si proiectele onlineschool si onlineshop
 }

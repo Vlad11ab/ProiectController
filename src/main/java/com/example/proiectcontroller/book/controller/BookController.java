@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,36 +29,42 @@ public class BookController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasAuthority('book:read')")
     public ResponseEntity<List<BookResponse>> getAllBooks(){
         log.info("HTTP GET ALL BOOKS METHOD");
         return ResponseEntity.status(HttpStatus.OK).body(bookQueryService.getAllBooks());
     }
 
     @GetMapping("/{bookId}")
+    @PreAuthorize("hasAuthority('book:read')")
     public ResponseEntity<BookResponse> getBookById(@PathVariable Long bookId){
         log.info("HTTP GET /api/v1/books/{}", bookId);
         return ResponseEntity.status(HttpStatus.OK).body(bookQueryService.getBookById(bookId));
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasAuthority('book:write')")
     public ResponseEntity<BookResponse> createBook(@Valid @RequestBody BookCreateRequest book){
         log.info("HTTP POST /api/v1/books name={} category={}", book.name(), book.category());
         return ResponseEntity.status(HttpStatus.CREATED).body(bookCommandService.createBook(book));
     }
 
     @PatchMapping("/edit/{bookId}")
+    @PreAuthorize("hasAuthority('book:edit')")
     public ResponseEntity<BookResponse> patchBook(@PathVariable Long bookId, @Valid @RequestBody BookPatchRequest patched){
         log.info("HTTP PATCH /api/v1/books/{}", bookId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(bookCommandService.patchBook(bookId,patched));
     }
 
     @PutMapping("/update/{bookId}")
+    @PreAuthorize("hasAuthority('book:edit')")
     public ResponseEntity<BookResponse> updateBook(@PathVariable Long bookId, @Valid @RequestBody BookPutRequest updated){
         log.info("HTTP UPDATE /api/v1/books/edit/{}", bookId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(bookCommandService.updateBook(bookId,updated));
     }
 
     @DeleteMapping("/delete/{bookId}")
+    @PreAuthorize("hasAuthority('book:delete')")
     public ResponseEntity<Void> deleteBook(@PathVariable Long bookId){
         log.info("HTTP DELETE /api/v1/books/{}", bookId);
         bookCommandService.deleteBook(bookId);

@@ -110,6 +110,5 @@ public class BookControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("Validation Failed"));
     }
 
-    //todo: teste de integrare pe proiect cu mai multe modele
 
 }

@@ -1,6 +1,5 @@
 package com.example.proiectcontroller.book.repository;
 
-import ch.qos.logback.core.pattern.parser.OptionTokenizer;
 import com.example.proiectcontroller.book.model.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
