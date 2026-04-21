@@ -12,3 +12,9 @@ spring:
       hibernate:
         format_sql: false
         globally_quoted_identifiers: true
+
+application:
+  jwt:
+    tokenPrefix: "Bearer"
+    tokenExpirationAfterDays: 7
+    secretKey: testSecretKeyForTestingPurposesOnly1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ
