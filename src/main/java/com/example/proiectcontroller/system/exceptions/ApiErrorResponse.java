@@ -1,10 +1,15 @@
 package com.example.proiectcontroller.system.exceptions;
-import java.time.LocalDateTime;
-import java.util.Map;
+
+import java.time.Instant;
 
 public record ApiErrorResponse(
-        LocalDateTime localDate,
-        String message,
+        String timestamp,
         int status,
-        Map<String, Object> details
-){}
+        String error,
+        String message,
+        String path
+) {
+    public static ApiErrorResponse of(int status, String error, String message, String path) {
+        return new ApiErrorResponse(Instant.now().toString(), status, error, message, path);
+    }
+}

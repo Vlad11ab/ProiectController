@@ -1,7 +1,7 @@
 package com.example.proiectcontroller.book.dtos;
 
 public record BookResponse(
-        int id,
+        Long id,
         String name,
         String category
 ){}

@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -47,6 +48,7 @@ public class BookControllerIntegrationTest {
         );
 
         MvcResult createResult = mockMvc.perform(post("/api/v1/books/add")
+                .with(jwt().authorities(() -> "book:write"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
@@ -54,12 +56,14 @@ public class BookControllerIntegrationTest {
                 .andReturn();
         BookResponse created = objectMapper.readValue(createResult.getResponse().getContentAsByteArray(), BookResponse.class);
 
-        mockMvc.perform(get("/api/v1/books/{bookId}", created.id()))
+        mockMvc.perform(get("/api/v1/books/{bookId}", created.id())
+                .with(jwt().authorities(() -> "book:read")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Book"));
 
         BookPutRequest put = new BookPutRequest("UpdatedBook","UpdatedEducation");
         mockMvc.perform(put("/api/v1/books/update/{bookId}",created.id())
+                .with(jwt().authorities(() -> "book:edit"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(put)))
                 .andExpect(status().isAccepted())
@@ -67,15 +71,18 @@ public class BookControllerIntegrationTest {
 
         BookPatchRequest patch = new BookPatchRequest(null,"PatchedEducation");
         mockMvc.perform(patch("/api/v1/books/edit/{bookId}",created.id())
+                .with(jwt().authorities(() -> "book:edit"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patch)))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.category").value("PatchedEducation"));
 
-        mockMvc.perform(delete("/api/v1/books/delete/{bookId}", created.id()))
+        mockMvc.perform(delete("/api/v1/books/delete/{bookId}", created.id())
+                .with(jwt().authorities(() -> "book:delete")))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/v1/books/{bookId}",created.id()))
+        mockMvc.perform(get("/api/v1/books/{bookId}",created.id())
+                .with(jwt().authorities(() -> "book:read")))
                 .andExpect(status().isNotFound());
 
     }
@@ -85,6 +92,7 @@ public class BookControllerIntegrationTest {
         BookCreateRequest request = new BookCreateRequest("Book2", "Education2");
 
      mockMvc.perform(post("/api/v1/books/add")
+                        .with(jwt().authorities(() -> "book:write"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
              .andDo(print())
@@ -92,6 +100,7 @@ public class BookControllerIntegrationTest {
 
 
      mockMvc.perform(post("/api/v1/books/add")
+                        .with(jwt().authorities(() -> "book:write"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -104,10 +113,37 @@ public class BookControllerIntegrationTest {
         BookCreateRequest invalid = new BookCreateRequest(null,null);
 
         mockMvc.perform(post("/api/v1/books/add")
+                .with(jwt().authorities(() -> "book:write"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Validation Failed"));
+                .andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.message").value("Validation Failed"))
+                .andExpect(jsonPath("$.path").value("/api/v1/books/add"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void unauthenticatedRequestReturnsUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/books/1"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("Trebuie sa fii autentificat pentru a accesa aceasta resursa."))
+                .andExpect(jsonPath("$.path").value("/api/v1/books/1"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void authenticatedWithoutPermissionReturnsForbidden() throws Exception {
+        mockMvc.perform(delete("/api/v1/books/delete/1")
+                .with(jwt().authorities(() -> "book:read")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.error").value("FORBIDDEN"))
+                .andExpect(jsonPath("$.message").value("Nu ai permisiunea necesara pentru aceasta actiune."))
+                .andExpect(jsonPath("$.path").value("/api/v1/books/delete/1"))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 
 
