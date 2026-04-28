@@ -1,17 +1,25 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://localhost:3307/proiectController?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: HikariPool
+      minimum-idle: 5
+      maximum-pool-size: 10
+      idle-timeout: 60000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: false
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
-        format_sql: false
-        globally_quoted_identifiers: true
+        format_sql: true
+    open-in-view: false
 
 application:
   jwt:

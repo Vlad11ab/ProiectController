@@ -44,6 +44,7 @@ public class BookController {
 
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('book:write')")
+
     public ResponseEntity<BookResponse> createBook(@Valid @RequestBody BookCreateRequest book){
         log.info("HTTP POST /api/v1/books name={} category={}", book.name(), book.category());
         return ResponseEntity.status(HttpStatus.CREATED).body(bookCommandService.createBook(book));
